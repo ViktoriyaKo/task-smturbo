@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import Table from "react-bootstrap/Table";
 import { Alert, Container } from "react-bootstrap";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
+import CustomPagination from "@/components/Pagination";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,24 +19,28 @@ type TUserItem = {
 type TGetServerSideProps = {
   statusCode: number;
   users: TUserItem[];
+  total: number;
 };
 
 export const getServerSideProps = (async (ctx: GetServerSidePropsContext): Promise<{ props: TGetServerSideProps }> => {
   try {
-    const res = await fetch("http://localhost:3000/users", { method: "GET" });
-    if (!res.ok) {
-      return { props: { statusCode: res.status, users: [] } };
-    }
+    const { query } = ctx;
+    const currentPage = query.page || 1;
+    const res = await fetch(`http://localhost:3000/users?page=${currentPage}`, { method: "GET" });
 
+    if (!res.ok) {
+      return { props: { statusCode: res.status, users: [], total: 0 } };
+    }
+    const result = await res.json();
     return {
-      props: { statusCode: 200, users: await res.json() },
+      props: { statusCode: 200, users: result.users, total: result.total },
     };
   } catch (e) {
-    return { props: { statusCode: 500, users: [] } };
+    return { props: { statusCode: 500, users: [], total: 0 } };
   }
 }) satisfies GetServerSideProps<TGetServerSideProps>;
 
-export default function Home({ statusCode, users }: TGetServerSideProps) {
+export default function Home({ statusCode, users, total }: TGetServerSideProps) {
   if (statusCode !== 200) {
     return <Alert variant={"danger"}>Ошибка {statusCode} при загрузке данных</Alert>;
   }
@@ -65,8 +70,7 @@ export default function Home({ statusCode, users }: TGetServerSideProps) {
               </tr>
             </thead>
             <tbody>
-              {/* {
-              users.map((user) => (
+              {users.map((user) => (
                 <tr key={user.id}>
                   <td>{user.id}</td>
                   <td>{user.firstname}</td>
@@ -75,12 +79,11 @@ export default function Home({ statusCode, users }: TGetServerSideProps) {
                   <td>{user.email}</td>
                   <td>{user.updatedAt}</td>
                 </tr>
-              ))
-            } */}
+              ))}
             </tbody>
           </Table>
 
-          {/*TODO add pagination*/}
+          {total ? <CustomPagination totalCount={total} /> : null}
         </Container>
       </main>
     </>
