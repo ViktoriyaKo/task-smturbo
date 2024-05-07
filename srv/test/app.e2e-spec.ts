@@ -17,8 +17,13 @@ describe('AppController (e2e)', () => {
 
   it('/ (GET)', () => {
     return request(app.getHttpServer())
-      .get('/')
+      .get('/users')
       .expect(200)
-      .expect('Hello World!');
+      .expect((res) => {
+        const { users, total } = res.body;
+
+        expect(Array.isArray(users)).toBeTruthy();
+        expect(typeof total).toBe('number');
+      });
   });
 });

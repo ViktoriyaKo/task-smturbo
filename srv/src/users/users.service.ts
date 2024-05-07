@@ -13,7 +13,15 @@ export class UserService {
   ) {}
 
   // get list of all users
-  async findAll(): Promise<UsersEntity[]> {
-    return await this.usersRepo.find();
+  async findAll(page: number = 1, limit: number = 20) {
+    const skip = (page - 1) * limit;
+    const [users, total] = await Promise.all([
+      this.usersRepo.find({
+        skip,
+        take: limit,
+      }),
+      this.usersRepo.count(),
+    ]);
+    return { users, total };
   }
 }
