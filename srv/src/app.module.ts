@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import 'dotenv/config';
+import { ServerModule } from './server/server.module';
 
 const pg = new URL(process.env.APP_PG_URL);
 
@@ -22,6 +23,7 @@ const pg = new URL(process.env.APP_PG_URL);
       useUTC: true,
     }),
     UsersModule,
+    ServerModule,
   ],
   controllers: [],
   providers: [],

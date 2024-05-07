@@ -26,4 +26,8 @@ describe('AppController (e2e)', () => {
         expect(typeof total).toBe('number');
       });
   });
+
+  it('/ (GET)', () => {
+    return request(app.getHttpServer()).get('/').expect(200).expect('Server has started');
+  });
 });
