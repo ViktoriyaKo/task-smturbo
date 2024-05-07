@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import Pagination from "react-bootstrap/Pagination";
 
 interface IProps {
@@ -18,7 +18,7 @@ const CustomPagination = (props: IProps) => {
     (pageNumber: number) => {
       router.push({
         query: {
-          ...(Number(pageNumber) === 1 ? "" : { page: pageNumber }),
+          ...(pageNumber === 1 ? {} : { page: pageNumber }),
         },
       });
     },
@@ -26,8 +26,16 @@ const CustomPagination = (props: IProps) => {
   );
 
   const renderPaginationItems = () => {
-    const startPage = Math.max(1, currentPage - 5);
-    const endPage = Math.min(totalPages, startPage + 9);
+    let startPage = Math.max(1, currentPage - 4);
+    let endPage = Math.min(totalPages, startPage + 9);
+
+    if (currentPage <= 5) {
+      startPage = 1;
+      endPage = Math.min(totalPages, startPage + 9);
+    } else if (currentPage >= totalPages - 4) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - 9);
+    }
 
     return Array.from({ length: endPage - startPage + 1 }, (_, index) => {
       const pageNumber = startPage + index;
